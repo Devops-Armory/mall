@@ -1,0 +1,172 @@
+version: "3.8"
+services:
+  mall-admin:
+    image: mall-admin:latest
+    container_name: mall-admin
+    ports:
+      - "8080:8080"
+    env_file:
+      - ../config/mall-admin/.env
+    restart: always
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      asminio:
+        condition: service_healthy
+      logstash:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+
+  mall-portal:
+    image: mall-portal:latest
+    container_name: mall-portal
+    ports:
+      - "8085:8085"
+    env_file:
+      - ../config/mall-portal/.env
+    restart: always
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      asminio:
+        condition: service_healthy
+      logstash:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+
+  mall-search:
+    image: mall-search:latest
+    container_name: mall-search
+    ports:
+      - "8081:8081"
+    env_file:
+      - ../config/mall-search/.env
+    restart: always
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      asminio:
+        condition: service_healthy
+      logstash:
+        condition: service_healthy
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.3
+    container_name: elasticsearch
+    restart: always
+    environment:
+      - node.name=es01
+      - cluster.name=es-docker-cluster
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+      - ./elk-stack/elasticsearch/plugins:/usr/share/elasticsearch/plugins/analysis-ik
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=1s"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.3
+    container_name: kibana
+    restart: always
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5601/api/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.17.3
+    container_name: logstash
+    restart: always
+    volumes:
+      - ./elk-stack/logstash/pipeline:/usr/share/logstash/pipeline:ro
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9600/"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mongodb:
+    image: mongodb/mongodb-community-server:7.0.21-ubuntu2204
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3.13.7-management-alpine
+    container_name: rabbitmq
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=ashmrabbit
+      - RABBITMQ_DEFAULT_PASS=rabbitmqpass
+      - RABBITMQ_DEFAULT_VHOST=/mall
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  asminio:
+    image: quay.io/minio/minio
+    container_name: asminio
+    restart: always
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  es_data:
+    driver: local
+  mongo_data:
+    driver: local
+  minio_data:
+    driver: local

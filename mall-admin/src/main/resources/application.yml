@@ -1,34 +1,69 @@
 spring:
   application:
-    name: mall-admin
-  profiles:
-    active: dev #默认为开发环境
+    name: ${SPRING_APPLICATION_NAME:mall-admin}
   servlet:
     multipart:
-      enabled: true #开启文件上传
-      max-file-size: 10MB #限制文件上传大小为10M
+      enabled: ${SPRING_SERVLET_MULTIPART_ENABLED:true}
+      max-file-size: ${SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE:10MB} #限制文件上传大小为10M
   mvc:
     pathmatch:
-      matching-strategy: ant_path_matcher
+      matching-strategy: ${SPRING_MVC_PATHMATCH_STRATEGY:ant_path_matcher}
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:mall}?useUnicode=true&characterEncoding=utf-8&serverTimezone=${MYSQL_TIMEZONE:Asia/Shanghai}&useSSL=${MYSQL_USE_SSL:true}
+    username: ${MYSQL_USERNAME:}
+    password: ${MYSQL_PASSWORD:}
+  redis:
+    host: ${REDIS_HOST:} # Redis服务器地址
+    database: ${REDIS_DATABASE:0} # Redis数据库索引（默认为0）
+    port: ${REDIS_PORT:6379} # Redis服务器连接端口
+    password: ${REDIS_PASSWORD:} # Redis服务器连接密码（默认为空）
+    timeout: ${REDIS_TIMEOUT:300ms} # 连接超时时间（毫秒）
 
-mybatis:
-  mapper-locations:
-    - classpath:dao/*.xml
-    - classpath*:com/**/mapper/*.xml
 
 jwt:
-  tokenHeader: Authorization #JWT存储的请求头
-  secret: mall-admin-secret #JWT加解密使用的密钥
-  expiration: 604800 #JWT的超期限时间(60*60*24*7)
-  tokenHead: 'Bearer '  #JWT负载中拿到开头
+  tokenHeader: ${JWT_TOKEN_HEADER:Authorization} #JWT存储的请求头
+  secret: ${JWT_SECRET:} #JWT加解密使用的密钥
+  expiration: ${JWT_EXPIRATION:604800} #JWT的超期限时间(60*60*24*7)
+  tokenHead: ${JWT_TOKEN_HEAD:'Bearer '} #JWT负载中拿到开头
 
 redis:
-  database: mall
+  database: ${REDIS_BUSINESS_DATABASE:mall}
   key:
-    admin: 'ums:admin'
-    resourceList: 'ums:resourceList'
+    admin: ${REDIS_KEY_ADMIN:'ums:admin'}
+    resourceList: ${REDIS_KEY_RESOURCE_LIST:'ums:resourceList'}
   expire:
-    common: 86400 # 24小时
+    common: ${REDIS_EXPIRE_COMMON:86400} # 24小时
+
+
+minio:
+  endpoint: ${MINIO_ENDPOINT:} #MinIO服务所在地址
+  bucketName: ${MINIO_BUCKET_NAME:} #存储桶名称
+  accessKey: ${MINIO_ACCESS_KEY:} #访问的key
+  secretKey: ${MINIO_SECRET_KEY:} #访问的秘钥
+
+logging:
+  file:
+    path: ${LOG_FILE_PATH:/var/logs}
+  level:
+    root: ${LOG_LEVEL_ROOT:info}
+    com.macro.mall: ${LOG_LEVEL_MALL:info}
+
+logstash:
+  host: ${LOGSTASH_HOST:}
+
+aliyun:
+  oss:
+    endpoint: ${ALIYUN_OSS_ENDPOINT:} # oss对外服务的访问域名
+    accessKeyId: ${ALIYUN_OSS_ACCESS_KEY_ID:} # 访问身份验证中用到用户标识
+    accessKeySecret: ${ALIYUN_OSS_ACCESS_KEY_SECRET:} # 用户用于加密签名字符串和oss用来验证签名字符串的密钥
+    bucketName: ${ALIYUN_OSS_BUCKET_NAME:} # oss的存储空间
+    policy:
+      expire: ${ALIYUN_OSS_POLICY_EXPIRE:300} # 签名有效期(S)
+    maxSize: ${ALIYUN_OSS_MAX_SIZE:10} # 上传文件大小(M)
+    callback: ${ALIYUN_OSS_CALLBACK:} # 文件上传成功后的回调地址
+    dir:
+      prefix: ${ALIYUN_OSS_DIR_PREFIX:mall/images/} # 上传文件夹路径前缀
+
 
 secure:
   ignored:
@@ -50,15 +85,7 @@ secure:
       - /admin/logout
       - /minio/upload
 
-aliyun:
-  oss:
-    endpoint: oss-cn-shenzhen.aliyuncs.com # oss对外服务的访问域名
-    accessKeyId: test # 访问身份验证中用到用户标识
-    accessKeySecret: test # 用户用于加密签名字符串和oss用来验证签名字符串的密钥
-    bucketName: macro-oss # oss的存储空间
-    policy:
-      expire: 300 # 签名有效期(S)
-    maxSize: 10 # 上传文件大小(M)
-    callback: http://39.98.190.128:8080/aliyun/oss/callback # 文件上传成功后的回调地址
-    dir:
-      prefix: mall/images/ # 上传文件夹路径前缀
+mybatis:
+  mapper-locations:
+    - classpath:dao/*.xml
+    - classpath*:com/**/mapper/*.xml

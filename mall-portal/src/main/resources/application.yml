@@ -1,22 +1,68 @@
+server:
+  port: ${SERVER_PORT:8085}
+
 spring:
   application:
-    name: mall-portal
-  profiles:
-    active: dev #默认为开发环境
+    name: ${SPRING_APPLICATION_NAME:mall-portal}
   mvc:
     pathmatch:
-      matching-strategy: ant_path_matcher
-
-mybatis:
-  mapper-locations:
-    - classpath:dao/*.xml
-    - classpath*:com/**/mapper/*.xml
+      matching-strategy: ${SPRING_MVC_PATHMATCH_STRATEGY:ant_path_matcher}
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:mall}?useUnicode=true&characterEncoding=utf-8&serverTimezone=${MYSQL_TIMEZONE:Asia/Shanghai}&useSSL=${MYSQL_USE_SSL:true}
+    username: ${MYSQL_USERNAME:}
+    password: ${MYSQL_PASSWORD:}
+    druid:
+      initial-size: ${DRUID_INITIAL_SIZE:5} #连接池初始化大小
+      min-idle: ${DRUID_MIN_IDLE:10} #最小空闲连接数
+      max-active: ${DRUID_MAX_ACTIVE:20} #最大连接数
+      web-stat-filter:
+        exclusions: ${DRUID_EXCLUSIONS:"*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*"} #不统计这些请求数据
+      stat-view-servlet: #访问监控网页的登录用户名和密码
+        login-username: ${DRUID_LOGIN_USERNAME:}
+        login-password: ${DRUID_LOGIN_PASSWORD:}
+  data:
+    mongodb:
+      host: ${MONGO_HOST:}
+      port: ${MONGO_PORT:27017}
+      database: ${MONGO_DATABASE:mall-portal}
+  redis:
+    host: ${REDIS_HOST:} # Redis服务器地址
+    database: ${REDIS_DATABASE:0} # Redis数据库索引（默认为0）
+    port: ${REDIS_PORT:6379} # Redis服务器连接端口
+    password: ${REDIS_PASSWORD:} # Redis服务器连接密码（默认为空）
+    timeout: ${REDIS_TIMEOUT:300ms} # 连接超时时间（毫秒）
+  rabbitmq:
+    host: ${RABBITMQ_HOST:}
+    port: ${RABBITMQ_PORT:5672}
+    virtual-host: ${RABBITMQ_VIRTUAL_HOST:/mall}
+    username: ${RABBITMQ_USERNAME:}
+    password: ${RABBITMQ_PASSWORD:}
 
 jwt:
-  tokenHeader: Authorization #JWT存储的请求头
-  secret: mall-portal-secret #JWT加解密使用的密钥
-  expiration: 604800 #JWT的超期限时间(60*60*24*7)
-  tokenHead: 'Bearer '  #JWT负载中拿到开头
+  tokenHeader: ${JWT_TOKEN_HEADER:Authorization} #JWT存储的请求头
+  secret: ${JWT_SECRET:} #JWT加解密使用的密钥
+  expiration: ${JWT_EXPIRATION:604800} #JWT的超期限时间(60*60*24*7)
+  tokenHead: ${JWT_TOKEN_HEAD:'Bearer '} #JWT负载中拿到开头
+
+# 自定义redis key和队列配置（合并后）
+redis:
+  database: ${REDIS_BUSINESS_DATABASE:mall}
+  key:
+    authCode: ${REDIS_KEY_AUTH_CODE:'ums:authCode'}
+    orderId: ${REDIS_KEY_ORDER_ID:'oms:orderId'}
+    member: ${REDIS_KEY_MEMBER:'ums:member'}
+  expire:
+    authCode: ${REDIS_EXPIRE_AUTH_CODE:90} # 验证码超期时间
+    common: ${REDIS_EXPIRE_COMMON:86400} # 24小时
+
+rabbitmq:
+  queue:
+    name:
+      cancelOrder: ${RABBITMQ_QUEUE_CANCEL_ORDER:cancelOrderQueue}
+
+mongo:
+  insert:
+    sqlEnable: ${MONGO_INSERT_SQL_ENABLE:true} # 用于控制是否通过数据库数据来插入mongo
 
 secure:
   ignored:
@@ -38,24 +84,25 @@ secure:
       - /brand/**
       - /alipay/**
 
-# 自定义redis key
-redis:
-  database: mall
-  key:
-    authCode: 'ums:authCode'
-    orderId: 'oms:orderId'
-    member: 'ums:member'
-  expire:
-    authCode: 90 # 验证码超期时间
-    common: 86400 # 24小时
+mybatis:
+  mapper-locations:
+    - classpath:dao/*.xml
+    - classpath*:com/**/mapper/*.xml
 
-mongo:
-  insert:
-    sqlEnable: true # 用于控制是否通过数据库数据来插入mongo
+logging:
+  file:
+    path: ${LOG_FILE_PATH:/var/logs}
+  level:
+    root: ${LOG_LEVEL_ROOT:info}
+    com.macro.mall: ${LOG_LEVEL_MALL:info}
 
-# 消息队列定义
-rabbitmq:
-  queue:
-    name:
-      cancelOrder: cancelOrderQueue
+logstash:
+  host: ${LOGSTASH_HOST:}
 
+alipay:
+  gatewayUrl: ${ALIPAY_GATEWAY_URL:}
+  appId: ${ALIPAY_APP_ID:}
+  alipayPublicKey: ${ALIPAY_PUBLIC_KEY:}
+  appPrivateKey: ${ALIPAY_PRIVATE_KEY:}
+  returnUrl: ${ALIPAY_RETURN_URL:}
+  notifyUrl: ${ALIPAY_NOTIFY_URL:}

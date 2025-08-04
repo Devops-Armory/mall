@@ -1,19 +1,46 @@
 spring:
   application:
-    name: mall-search
-  profiles:
-    active: dev #默认为开发环境
+    name: ${SPRING_APPLICATION_NAME:mall-search}
   mvc:
     pathmatch:
-      matching-strategy: ant_path_matcher
+      matching-strategy: ${SPRING_MVC_PATHMATCH_STRATEGY:ant_path_matcher}
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:mall}?useUnicode=true&characterEncoding=utf-8&serverTimezone=${MYSQL_TIMEZONE:Asia/Shanghai}&useSSL=${MYSQL_USE_SSL:true}
+    username: ${MYSQL_USERNAME:}
+    password: ${MYSQL_PASSWORD:}
+    druid:
+      initial-size: ${DRUID_INITIAL_SIZE:5} #连接池初始化大小
+      min-idle: ${DRUID_MIN_IDLE:10} #最小空闲连接数
+      max-active: ${DRUID_MAX_ACTIVE:20} #最大连接数
+      web-stat-filter:
+        exclusions: ${DRUID_EXCLUSIONS:"*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*"} #不统计这些请求数据
+      stat-view-servlet: #访问监控网页的登录用户名和密码
+        login-username: ${DRUID_LOGIN_USERNAME:}
+        login-password: ${DRUID_LOGIN_PASSWORD:}
+  data:
+    elasticsearch:
+      repositories:
+        enabled: ${ELASTICSEARCH_REPOSITORIES_ENABLED:true}
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URIS:}
 
 server:
-  port: 8081
+  port: ${SERVER_PORT:8081}
 
 mybatis:
   mapper-locations:
     - classpath:dao/*.xml
     - classpath*:com/**/mapper/*.xml
+
+logging:
+  file:
+    path: ${LOG_FILE_PATH:/var/logs}
+  level:
+    root: ${LOG_LEVEL_ROOT:info}
+    com.macro.mall: ${LOG_LEVEL_MALL:info}
+
+logstash:
+  host: ${LOGSTASH_HOST:}
 
 
 
