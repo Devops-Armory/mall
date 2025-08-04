@@ -1,0 +1,29 @@
+# Maven/Gradle 构建缓存和输出
+target/
+build/
+out/
+
+# 依赖缓存
+.mvn/
+.gradle/
+node_modules/
+
+# 日志和临时文件
+*.log
+*.tmp
+*.swp
+.DS_Store
+
+# 版本控制和编辑器配置
+.git/
+.gitignore
+.idea/
+.vscode/
+*.md
+
+# 环境变量和敏感信息
+.env
+.env.*
+env/
+docker-compose.yml
+LICENSE

@@ -1,0 +1,56 @@
+#================================================================================
+# ● Application Settings
+#================================================================================
+# SERVER_PORT=8081                          # 服务端口 (Default: 8081)
+# SPRING_APPLICATION_NAME=mall-search       # 应用名称 (Default: mall-search)
+# SPRING_MVC_PATHMATCH_STRATEGY=ant_path_matcher # 路径匹配策略 (Default: ant_path_matcher)
+
+
+#================================================================================
+# ● MySQL Database (Required)
+#================================================================================
+MYSQL_HOST=your-mysql-host.example.com         # MySQL主机地址，例如：mysql-mall-dev-sea-01.mysql.database.azure.com
+MYSQL_USERNAME=your_mysql_user                 # MySQL用户名，例如：ashmmysql
+MYSQL_PASSWORD=your_mysql_password             # MySQL密码
+MYSQL_DATABASE=mall                            # 数据库名
+# MYSQL_PORT=3306                              # MySQL端口 (Default: 3306)
+# MYSQL_TIMEZONE=Asia/Shanghai                 # 时区设置 (Default: Asia/Shanghai)
+MYSQL_USE_SSL=false
+
+#================================================================================
+# ● Druid Connection Pool
+#================================================================================
+# DRUID_INITIAL_SIZE=5                         # 连接池初始化大小 (Default: 5)
+# DRUID_MIN_IDLE=10                            # 最小空闲连接数 (Default: 10)
+# DRUID_MAX_ACTIVE=20                          # 最大连接数 (Default: 20)
+# DRUID_EXCLUSIONS="*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*" # 排除统计的请求 (Default: *.js,*.gif,...)
+DRUID_LOGIN_USERNAME=druid                     # 监控网页登录用户名
+DRUID_LOGIN_PASSWORD=druid                     # 监控网页登录密码
+
+
+#================================================================================
+# ● Elasticsearch (Required for search)
+#================================================================================
+ELASTICSEARCH_URIS=http://elasticsearch:9200   # Elasticsearch连接地址，例如：http://127.0.0.1:9200
+# ELASTICSEARCH_REPOSITORIES_ENABLED=true      # 是否启用ES仓库 (Default: true)
+
+
+#================================================================================
+# ● Logging
+#================================================================================
+# LOG_FILE_PATH=/var/logs                      # 日志文件路径 (Default: /var/logs)
+# LOG_LEVEL_ROOT=info                          # 根日志级别 (Default: info)
+# LOG_LEVEL_MALL=info                          # mall包日志级别 (Default: info)
+
+
+#================================================================================
+# ● Logstash (Optional)
+#================================================================================
+LOGSTASH_HOST=logstash                        # Logstash主机地址，例如：127.0.0.1:4560
+
+
+#================================================================================
+# ● Redis (Required)
+#================================================================================
+REDIS_HOST=your-redis-host.example.com         # Redis服务器地址，例如：mall.redis.cache.windows.net
+REDIS_PASSWORD=your_redis_password             # Redis密码

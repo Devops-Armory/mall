@@ -6,7 +6,7 @@ services:
     ports:
       - "8080:8080"
     env_file:
-      - ../config/mall-admin/.env
+      - ./env/.env.mall-admin
     restart: always
     depends_on:
       mongodb:
@@ -26,7 +26,7 @@ services:
     ports:
       - "8085:8085"
     env_file:
-      - ../config/mall-portal/.env
+      - ./env/.env.mall-portal
     restart: always
     depends_on:
       mongodb:
@@ -46,7 +46,7 @@ services:
     ports:
       - "8081:8081"
     env_file:
-      - ../config/mall-search/.env
+      - ./env/.env.mall-search
     restart: always
     depends_on:
       elasticsearch:

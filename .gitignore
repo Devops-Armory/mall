@@ -1,0 +1,16 @@
+# 忽略所有实际环境变量文件
+.env.mall-admin
+.env.mall-portal
+.env.mall-search
+
+# Maven #
+target/
+
+# IDEA #
+.idea/
+*.iml
+
+# Eclipse #
+.settings/
+.classpath
+.project
