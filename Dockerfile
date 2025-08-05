@@ -56,11 +56,9 @@ RUN cat > /entrypoint.sh << 'EOF'
 set -e
 
 # 如果第一个参数是 -jar，或者命令是空，我们就认为是启动 java
-# 这是一个更健壮的判断
 if [ "$1" = '-jar' ] || [ $# -eq 0 ]; then
     exec java ${JAVA_OPTS} -jar /app/app.jar "$@"
 else
-    # 否则，直接执行用户传入的命令
     exec "$@"
 fi
 EOF
