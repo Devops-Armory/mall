@@ -2,14 +2,20 @@ name: CICD Build for mall-admin
 
 on:
   push:
-    branches: [ lwflsq-patch-1 ]  # 改为目标分支
+    branches: [ lwflsq-patch-1 ]
     paths:
       - 'mall-admin/**'
+      - 'mall-mbg/**'
+      - 'mall-security/**'
+      - 'mall-common/**'
       - '.github/workflows/cicd-build.yml'
   pull_request:
-    branches: [ lwflsq-patch-1 ]  # 改为目标分支
+    branches: [ lwflsq-patch-1 ]
     paths:
       - 'mall-admin/**'
+      - 'mall-mbg/**'
+      - 'mall-security/**'
+      - 'mall-common/**'
       - '.github/workflows/cicd-build.yml'
 
 jobs:
@@ -27,15 +33,16 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      # 关键步骤：先安装父项目及所有依赖模块到本地仓库
+      - name: Install parent and dependent modules
+        run: mvn -B clean install -DskipTests --file pom.xml
+
+      # 再构建 mall-admin 模块
       - name: Build mall-admin with Maven
-        run: mvn -B clean package --file mall-admin/pom.xml
+        run: mvn -B clean package -DskipTests --file mall-admin/pom.xml
 
       - name: Upload mall-admin Jar
-        uses: actions/upload-artifact@v4  # 使用最新版本避免弃用警告
+        uses: actions/upload-artifact@v4
         with:
           name: mall-admin-lwflsq-build
           path: mall-admin/target/*.jar
-
-      # （可选）构建Docker镜像
-      - name: Build Docker image
-        run: docker build -t mall-admin:lwflsq-patch-1 --build-arg SERVICE_NAME=mall-admin .
