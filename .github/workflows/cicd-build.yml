@@ -3,12 +3,12 @@ name: CICD Build for mall-admin
 # 触发条件：针对cicd分支的推送和PR
 on:
   push:
-    branches: [ cicd ]
+    branches: [ lwflsq-patch-1 ]
     paths:
       - 'mall-admin/**'
       - '.github/workflows/cicd-build.yml'
   pull_request:
-    branches: [ cicd ]
+    branches: [ lwflsq-patch-1 ]
     paths:
       - 'mall-admin/**'
       - '.github/workflows/cicd-build.yml'
