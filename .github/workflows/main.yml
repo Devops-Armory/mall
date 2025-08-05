@@ -1,5 +1,5 @@
 # 工作流名称
-name: Manual Build for Mall Project
+name: Build and Push Docker
 run-name: Build and Push Docker Images for Mall Services
 # 触发器配置：仅手动触发
 on:
