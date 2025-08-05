@@ -57,7 +57,7 @@ RUN chown malluser:mallgroup app.jar && \
 
 
 # 创建日志目录并授权
-RUN mkdir -p /var/logs/spring.log && \
+RUN mkdir -p /var/logs/spring.log/debug /var/logs/spring.log/error && \
     chown -R malluser:mallgroup /var/logs
 
 USER malluser
