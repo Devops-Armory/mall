@@ -1,5 +1,5 @@
 name: mall CI/CD
-
+run-name: buld and push
 on:
   push:
     branches: [main, master, develop]
