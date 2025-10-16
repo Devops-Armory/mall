@@ -1,0 +1,73 @@
+# 工作流名称
+name: Build and Push Docker
+run-name: Build and Push Docker Images for Mall Services
+# 触发器配置：仅手动触发
+on:
+  workflow_dispatch:
+  push:
+    # 可以定义手动触发时需要输入的参数，这里我们暂时不需要
+    # inputs:
+    #   logLevel:
+    #     description: 'Log level'
+    #     required: true
+    #     default: 'warning'
+
+# 环境变量，方便统一管理
+env:
+  REGISTRY: ghcr.io                             # 使用GitHub Container Registry
+  IMAGE_OWNER: ${{ github.repository_owner }}   # 自动获取仓库所有者（你的用户名或组织名）
+
+jobs:
+  # --- 定义一个构建任务 ---
+  build-services:
+    name: Build ${{ matrix.service-name }}  # Job的名字会动态显示正在构建哪个服务
+    runs-on: ubuntu-latest
+    
+    # 定义这个Job需要的权限
+    permissions:
+      contents: read      # 读取代码权限
+      packages: write     # 写入镜像仓库(GHCR)权限
+
+    # 【核心】定义构建矩阵，我们会为下面列表中的每个服务都运行一次这个Job
+    strategy:
+      matrix:
+        service-name: [mall-admin, mall-portal, mall-search] # 你要构建的服务列表
+
+    steps:
+      # 1. 拉取代码
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. 设置Java和Maven环境，用于跑测试
+      - name: Setup Java JDK and Maven Cache
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'       # 与你Dockerfile中的build环境保持一致
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # 3. 运行单元测试 (作为质量门禁)
+      - name: Run Unit Tests with Maven
+        # 这会运行所有模块的测试，确保整个项目的代码是健康的
+        run: mvn test
+
+      # 4. 登录到GHCR
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3.5.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }} # 使用GitHub自动生成的Token
+
+      # 5. 构建并推送Docker镜像
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: . # Dockerfile在根目录，所以context是 .
+          file: ./Dockerfile # 明确指定Dockerfile的路径
+          push: true # 确认要推送镜像
+          # 【关键】通过build-args把矩阵中的服务名传递给Dockerfile
+          build-args: |
+            SERVICE_NAME=${{ matrix.service-name }}
+          # 【关键】为每个服务的镜像生成一个唯一的标签
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ matrix.service-name }}:${{ github.sha }}

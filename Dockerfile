@@ -47,28 +47,19 @@ WORKDIR /app
 ARG SERVICE_NAME=mall-admin
 COPY --from=build /build/${SERVICE_NAME}/target/${SERVICE_NAME}-*.jar app.jar
 
+# 从本地复制 entrypoint.sh 脚本到镜像中
+COPY entrypoint.sh /entrypoint.sh
+
 # 修改 jar 包属主
-RUN chown malluser:mallgroup app.jar
+RUN chown malluser:mallgroup app.jar && \
+    chown malluser:mallgroup /entrypoint.sh && \
+    chmod +x /entrypoint.sh
 
-# 生成启动脚本，支持参数透传
-RUN cat > /entrypoint.sh << 'EOF'
-#!/bin/sh
-set -e
 
-# 如果第一个参数是 -jar，或者命令是空，我们就认为是启动 java
-# 这是一个更健壮的判断
-if [ "$1" = '-jar' ] || [ $# -eq 0 ]; then
-    exec java ${JAVA_OPTS} -jar /app/app.jar "$@"
-else
-    # 否则，直接执行用户传入的命令
-    exec "$@"
-fi
-EOF
-
-# 设置脚本权限和属主
-RUN chown malluser:mallgroup /entrypoint.sh && chmod +x /entrypoint.sh 
+# 创建日志目录并授权
 RUN mkdir -p /var/logs/spring.log/debug /var/logs/spring.log/error && \
     chown -R malluser:mallgroup /var/logs
+
 USER malluser
 
 # 设置容器启动入口
@@ -77,5 +68,5 @@ ENTRYPOINT ["/entrypoint.sh"]
 # 暴露应用端口
 EXPOSE 8080
 
-# CMD 现在可以为空，由 entrypoint.sh 脚本处理
+# 默认命令，entrypoint.sh 会处理它
 CMD []
